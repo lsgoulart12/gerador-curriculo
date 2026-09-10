@@ -65,6 +65,7 @@ function isApprovedPurchase(payload) {
 
     const event = String(
         payload.event
+        || payload.evento
         || payload.webhook_event
         || payload.type
         || ''
@@ -108,6 +109,16 @@ function getCustomerEmail(payload) {
         || payload.order?.customer?.email
         || ''
     ).trim().toLowerCase();
+}
+
+function getCustomerName(payload) {
+    return String(
+        payload.customer?.full_name
+        || payload.customer?.name
+        || payload.client?.full_name
+        || payload.client?.name
+        || ''
+    ).trim();
 }
 
 function getEventId(payload) {
@@ -188,6 +199,7 @@ module.exports = async function webhook(request, response) {
             return sendJson(response, 400, { error: 'Dados do comprador ou evento inválidos.' });
         }
 
+        console.log(`Compra aprovada para: ${getCustomerName(payload) || 'Cliente'} (${email})`);
         const token = createJwt(email, eventId);
         return sendJson(response, 200, {
             received: true,
